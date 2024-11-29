@@ -15,7 +15,7 @@ PipeCall is an AI-generated lightweight, high-performance library for executing 
 Here's a minimal example showing how to use PipeCall:
 
 ```csharp
-// Define your interface/abstract class
+// Define your interface/abstract class, you can put into a common dll.
 public abstract class MyDelegate : ProcessDelegate
 {
     protected MyDelegate() { }  // Protected constructor
@@ -24,7 +24,7 @@ public abstract class MyDelegate : ProcessDelegate
     public abstract string Concatenate(string[] strings);
 }
 
-// Implement the actual delegate
+// Implement the actual delegate in client.exe
 public class ActualDelegate : MyDelegate
 {
     public override int Add(int a, int b)
@@ -41,7 +41,7 @@ public class ActualDelegate : MyDelegate
     }
 }
 
-// Use it in your main program
+// Use it in your main program, like server.exe
 class Program
 {
     static void Main()
