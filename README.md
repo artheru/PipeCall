@@ -2,6 +2,9 @@
 
 PipeCall is an AI-generated lightweight, high-performance library for executing .NET methods across process boundaries. It uses anonymous pipes for communication and a custom binary serializer for efficient data transfer. 
 
+A major use of PipeCall is to call .net framework methods from a >.net5 app. For exmaple, System.IO.Ports are broken >.net5 but good in .netfx48.
+Another use is to prevent some flawed library from crashing the main program, so a seperated process would be useful.
+
 ## Features
 
 - Execute methods in a separate process with type safety
@@ -15,7 +18,7 @@ PipeCall is an AI-generated lightweight, high-performance library for executing 
 Here's a minimal example showing how to use PipeCall:
 
 ```csharp
-// Define your interface/abstract class
+// Define your interface/abstract class, you can put into a common dll.
 public abstract class MyDelegate : ProcessDelegate
 {
     protected MyDelegate() { }  // Protected constructor
@@ -24,7 +27,7 @@ public abstract class MyDelegate : ProcessDelegate
     public abstract string Concatenate(string[] strings);
 }
 
-// Implement the actual delegate
+// Implement the actual delegate in client.exe
 public class ActualDelegate : MyDelegate
 {
     public override int Add(int a, int b)
@@ -41,7 +44,7 @@ public class ActualDelegate : MyDelegate
     }
 }
 
-// Use it in your main program
+// Use it in your main program, like server.exe
 class Program
 {
     static void Main()
