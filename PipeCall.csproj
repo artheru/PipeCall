@@ -1,9 +1,55 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <!-- <OutputType>Exe</OutputType> -->
+    <!-- <TargetFramework>net8.0</TargetFramework> -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<TargetFramework>net8.0</TargetFramework>
+		<OutputType>Exe</OutputType>
+	</PropertyGroup>
+
+	<!-- Release configuration: Build DLL targeting .NET Standard 2.0 -->
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<OutputType>Library</OutputType>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<!-- General project properties -->
+		<PackageId>PipeCall</PackageId>
+		<!-- Unique name for your package -->
+		<Version>0.0.1</Version>
+		<!-- Package version -->
+		<Authors>Shicong Liu</Authors>
+		<Company>Lessokaji Ltd</Company>
+		<!-- Your name or company -->
+		<Description>Call .NET methods in another process</Description>
+		<PackageTags>cross-process, IPC, serialization, .NET</PackageTags>
+		<!-- Tags for searching -->
+		<RepositoryUrl>https://github.com/artheru/PipeCall</RepositoryUrl>
+		<!-- GitHub repository URL -->
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<!-- License -->
+		<PackageProjectUrl>https://github.com/artheru/PipeCall</PackageProjectUrl>
+		<!-- Project URL -->
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<!-- Exclude Program.cs and TestDelegate.cs from Release build -->
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<Compile Remove="Program.cs" />
+		<Compile Remove="TestDelegate.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="" />
+	</ItemGroup>
 </Project> 

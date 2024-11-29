@@ -11,7 +11,7 @@ internal static class ProxyGenerator
 
     static ProxyGenerator()
     {
-        Console.WriteLine("[ProxyGen] Initializing ModuleBuilder");
+        // Console.WriteLine("[ProxyGen] Initializing ModuleBuilder");
         var assemblyName = new AssemblyName("DynamicProxies");
         var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
         moduleBuilder = assemblyBuilder.DefineDynamicModule("ProxyModule");
@@ -19,11 +19,11 @@ internal static class ProxyGenerator
 
     public static Type CreateProxyType(Type baseType, object target)
     {
-        Console.WriteLine($"[ProxyGen] Creating proxy type for {baseType.FullName}");
-        Console.WriteLine($"[ProxyGen] Target type: {target.GetType().FullName}");
+        // Console.WriteLine($"[ProxyGen] Creating proxy type for {baseType.FullName}");
+        // Console.WriteLine($"[ProxyGen] Target type: {target.GetType().FullName}");
 
         var typeName = $"{baseType.Name}Proxy_{Guid.NewGuid():N}";
-        Console.WriteLine($"[ProxyGen] New type name: {typeName}");
+        // Console.WriteLine($"[ProxyGen] New type name: {typeName}");
 
         var typeBuilder = moduleBuilder.DefineType(typeName, 
             TypeAttributes.Public | TypeAttributes.Class, 
@@ -42,7 +42,7 @@ internal static class ProxyGenerator
             BindingFlags.NonPublic | BindingFlags.Instance,
             null, Type.EmptyTypes, null);
 
-        Console.WriteLine($"[ProxyGen] Base constructor found: {baseCtor != null}");
+        // Console.WriteLine($"[ProxyGen] Base constructor found: {baseCtor != null}");
 
         var ctorIL = ctor.GetILGenerator();
         ctorIL.Emit(OpCodes.Ldarg_0);
@@ -56,13 +56,13 @@ internal static class ProxyGenerator
         var methods = baseType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
             .Where(m => m.IsAbstract)
             .ToArray();
-        Console.WriteLine($"[ProxyGen] Found {methods.Length} abstract methods to implement");
+        // Console.WriteLine($"[ProxyGen] Found {methods.Length} abstract methods to implement");
 
         foreach (var method in methods)
         {
-            Console.WriteLine($"[ProxyGen] Implementing method: {method.Name}");
+            // Console.WriteLine($"[ProxyGen] Implementing method: {method.Name}");
             var parameters = method.GetParameters();
-            Console.WriteLine($"[ProxyGen] Method has {parameters.Length} parameters");
+            // Console.WriteLine($"[ProxyGen] Method has {parameters.Length} parameters");
 
             var methodBuilder = typeBuilder.DefineMethod(
                 method.Name,
@@ -74,25 +74,25 @@ internal static class ProxyGenerator
 
             // Declare locals
             var argsLocal = methodIL.DeclareLocal(typeof(object[]));
-            Console.WriteLine($"[ProxyGen] Declared args array local variable");
+            // Console.WriteLine($"[ProxyGen] Declared args array local variable");
 
             // Create array for method arguments
             methodIL.Emit(OpCodes.Ldc_I4, parameters.Length);
             methodIL.Emit(OpCodes.Newarr, typeof(object));
             methodIL.Emit(OpCodes.Stloc, argsLocal);
-            Console.WriteLine($"[ProxyGen] Created args array of length {parameters.Length}");
+            // Console.WriteLine($"[ProxyGen] Created args array of length {parameters.Length}");
 
             // Store each parameter in the array
             for (int i = 0; i < parameters.Length; i++)
             {
-                Console.WriteLine($"[ProxyGen] Processing parameter {i}: {parameters[i].ParameterType.Name}");
+                // Console.WriteLine($"[ProxyGen] Processing parameter {i}: {parameters[i].ParameterType.Name}");
                 methodIL.Emit(OpCodes.Ldloc, argsLocal);
                 methodIL.Emit(OpCodes.Ldc_I4, i);
                 methodIL.Emit(OpCodes.Ldarg, i + 1);
 
                 if (parameters[i].ParameterType.IsValueType)
                 {
-                    Console.WriteLine($"[ProxyGen] Boxing value type {parameters[i].ParameterType.Name}");
+                    // Console.WriteLine($"[ProxyGen] Boxing value type {parameters[i].ParameterType.Name}");
                     methodIL.Emit(OpCodes.Box, parameters[i].ParameterType);
                 }
 
@@ -100,7 +100,7 @@ internal static class ProxyGenerator
             }
 
             // Load target field and prepare for InvokeMethod call
-            Console.WriteLine("[ProxyGen] Loading target field and preparing InvokeMethod call");
+            // Console.WriteLine("[ProxyGen] Loading target field and preparing InvokeMethod call");
             methodIL.Emit(OpCodes.Ldarg_0);
             methodIL.Emit(OpCodes.Ldfld, targetField);
             methodIL.Emit(OpCodes.Ldstr, method.Name);
@@ -109,40 +109,40 @@ internal static class ProxyGenerator
             methodIL.Emit(OpCodes.Call, typeof(Type).GetMethod("GetTypeFromHandle"));
 
             var invokeMethod = target.GetType().GetMethod("InvokeMethod");
-            Console.WriteLine($"[ProxyGen] Found InvokeMethod: {invokeMethod != null}");
+            // Console.WriteLine($"[ProxyGen] Found InvokeMethod: {invokeMethod != null}");
             if (invokeMethod == null)
             {
                 throw new Exception("InvokeMethod not found on target type");
             }
 
             methodIL.Emit(OpCodes.Callvirt, invokeMethod);
-            Console.WriteLine("[ProxyGen] Called InvokeMethod");
+            // Console.WriteLine("[ProxyGen] Called InvokeMethod");
 
             if (method.ReturnType == typeof(void))
             {
-                Console.WriteLine("[ProxyGen] Void return type, popping result");
+                // Console.WriteLine("[ProxyGen] Void return type, popping result");
                 methodIL.Emit(OpCodes.Pop);
             }
             else if (method.ReturnType.IsValueType)
             {
-                Console.WriteLine($"[ProxyGen] Unboxing return value to {method.ReturnType.Name}");
+                // Console.WriteLine($"[ProxyGen] Unboxing return value to {method.ReturnType.Name}");
                 methodIL.Emit(OpCodes.Unbox_Any, method.ReturnType);
             }
             else
             {
-                Console.WriteLine($"[ProxyGen] Casting return value to {method.ReturnType.Name}");
+                // Console.WriteLine($"[ProxyGen] Casting return value to {method.ReturnType.Name}");
                 methodIL.Emit(OpCodes.Castclass, method.ReturnType);
             }
 
             methodIL.Emit(OpCodes.Ret);
-            Console.WriteLine("[ProxyGen] Method implementation complete");
+            // Console.WriteLine("[ProxyGen] Method implementation complete");
 
             typeBuilder.DefineMethodOverride(methodBuilder, method);
         }
 
-        Console.WriteLine("[ProxyGen] Creating type");
-        var type = typeBuilder.CreateType();
-        Console.WriteLine($"[ProxyGen] Type created: {type?.FullName ?? "NULL"}");
+        // Console.WriteLine("[ProxyGen] Creating type");
+        var type = typeBuilder.CreateTypeInfo();
+        // Console.WriteLine($"[ProxyGen] Type created: {type?.FullName ?? "NULL"}");
         return type;
     }
 }

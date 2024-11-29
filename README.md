@@ -1,5 +1,7 @@
 # PipeCall - Cross-Process Method Invocation Library
 
+[![NuGet Version](https://img.shields.io/nuget/v/PipeCall.svg)](https://www.nuget.org/packages/PipeCall/)
+
 PipeCall is an AI-generated lightweight, high-performance library for executing .NET methods across process boundaries. It uses anonymous pipes for communication and a custom binary serializer for efficient data transfer. 
 
 A major use of PipeCall is to call .net framework methods from a >.net5 app. For exmaple, System.IO.Ports are broken >.net5 but good in .netfx48.

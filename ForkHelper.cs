@@ -14,13 +14,13 @@ public static class ForkHelper<T> where T : ProcessDelegate
 {
     public static T Start(string processPath)
     {
-        Console.WriteLine($"[Server] Starting process: {processPath}");
-        Console.WriteLine($"[Server] Creating proxy for type: {typeof(T).FullName}");
+        // Console.WriteLine($"[Server] Starting process: {processPath}");
+        // Console.WriteLine($"[Server] Creating proxy for type: {typeof(T).FullName}");
             
         var proxy = new ProcessProxy(processPath);
         var proxyType = ProxyGenerator.CreateProxyType(typeof(T), proxy);
             
-        Console.WriteLine($"[Server] Proxy type created: {proxyType?.FullName ?? "NULL"}");
+        // Console.WriteLine($"[Server] Proxy type created: {proxyType?.FullName ?? "NULL"}");
             
         if (proxyType == null)
             throw new Exception("Failed to create proxy type");
@@ -151,16 +151,16 @@ public static class ForkHelper
             var binaryWriter = new BinaryWriter(pipeToServer, Encoding.UTF8, true);
             writer.AutoFlush = true;
 
-            Console.WriteLine("[Client] Creating delegate instance...");
+            // Console.WriteLine("[Client] Creating delegate instance...");
             var instance = Activator.CreateInstance<T>();
-            Console.WriteLine($"[Client] Instance created: {instance.GetType().FullName}");
+            // Console.WriteLine($"[Client] Instance created: {instance.GetType().FullName}");
 
             // Handle initial connection verification
             var ping = binaryReader.ReadString();
             if (ping == "PING")
             {
                 binaryWriter.Write("PONG");
-                Console.WriteLine("[Client] Connection verified");
+                // Console.WriteLine("[Client] Connection verified");
             }
 
             while (true)
@@ -216,8 +216,8 @@ public static class ForkHelper
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[Client] Communication error: {ex}");
-                    break;
+                    // Console.WriteLine($"[Client] Communication error: {ex}");
+                    return;
                 }
             }
         }
