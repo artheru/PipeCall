@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Collections.Concurrent;
 
 namespace PipeCall;
 
@@ -18,6 +19,9 @@ public static class FastSerializer
         Array = 3,
         Primitive = 4
     }
+
+    private static readonly ConcurrentDictionary<Type, FieldInfo[]> _fieldCache = 
+        new ConcurrentDictionary<Type, FieldInfo[]>();
 
     public static byte[] Serialize(object obj)
     {
@@ -113,12 +117,45 @@ public static class FastSerializer
             
         switch (Type.GetTypeCode(value.GetType()))
         {
+            case TypeCode.Boolean:
+                writer.Write((bool)value);
+                break;
+            case TypeCode.Byte:
+                writer.Write((byte)value);
+                break;
+            case TypeCode.SByte:
+                writer.Write((sbyte)value);
+                break;
+            case TypeCode.Char:
+                writer.Write((char)value);
+                break;
+            case TypeCode.Int16:
+                writer.Write((short)value);
+                break;
+            case TypeCode.UInt16:
+                writer.Write((ushort)value);
+                break;
             case TypeCode.Int32:
                 writer.Write((int)value);
+                break;
+            case TypeCode.UInt32:
+                writer.Write((uint)value);
+                break;
+            case TypeCode.Int64:
+                writer.Write((long)value);
+                break;
+            case TypeCode.UInt64:
+                writer.Write((ulong)value);
                 break;
             case TypeCode.Single:
                 writer.Write((float)value);
                 break;
+            case TypeCode.Double:
+                writer.Write((double)value);
+                break;
+            // case TypeCode.Decimal:
+            //     writer.Write((decimal)value);
+            //     break;
             default:
                 throw new ArgumentException($"Unsupported primitive type: {value.GetType().Name}");
         }
@@ -128,10 +165,32 @@ public static class FastSerializer
     {
         switch (Type.GetTypeCode(type))
         {
+            case TypeCode.Boolean:
+                return reader.ReadBoolean();
+            case TypeCode.Byte:
+                return reader.ReadByte();
+            case TypeCode.SByte:
+                return reader.ReadSByte();
+            case TypeCode.Char:
+                return reader.ReadChar();
+            case TypeCode.Int16:
+                return reader.ReadInt16();
+            case TypeCode.UInt16:
+                return reader.ReadUInt16();
             case TypeCode.Int32:
                 return reader.ReadInt32();
+            case TypeCode.UInt32:
+                return reader.ReadUInt32();
+            case TypeCode.Int64:
+                return reader.ReadInt64();
+            case TypeCode.UInt64:
+                return reader.ReadUInt64();
             case TypeCode.Single:
                 return reader.ReadSingle();
+            case TypeCode.Double:
+                return reader.ReadDouble();
+            // case TypeCode.Decimal:
+            //     return reader.ReadDecimal();
             default:
                 throw new ArgumentException($"Unsupported primitive type: {type.Name}");
         }
@@ -141,10 +200,12 @@ public static class FastSerializer
     {
         writer.Write((byte)SerializedValueType.ValueType);
 
-        // Get only instance fields that are not readonly or constant
-        var fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        // Use cached fields instead of reflecting every time
+        var fields = _fieldCache.GetOrAdd(type, t => t.GetFields(BindingFlags.Instance | 
+            BindingFlags.Public | 
+            BindingFlags.NonPublic)
             .Where(f => !f.IsInitOnly && !f.IsLiteral)
-            .ToArray();
+            .ToArray());
 
         // Write field count
         writer.Write(fields.Length);
@@ -160,10 +221,12 @@ public static class FastSerializer
     {
         var result = Activator.CreateInstance(type);
 
-        // Get only instance fields that are not readonly or constant
-        var fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        // Use the same cached fields
+        var fields = _fieldCache.GetOrAdd(type, t => t.GetFields(BindingFlags.Instance | 
+            BindingFlags.Public | 
+            BindingFlags.NonPublic)
             .Where(f => !f.IsInitOnly && !f.IsLiteral)
-            .ToArray();
+            .ToArray());
 
         // Read field count and verify
         var fieldCount = reader.ReadInt32();

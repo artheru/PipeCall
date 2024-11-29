@@ -10,11 +10,11 @@ class Program
     {
         if (Path.GetFileName(Environment.ProcessPath).ToLower() == "client.exe")
         {
-            ForkHelper.DelegateProcessMain<ActualDelegate>(args);
+            PipeCallee.DelegateProcessMain<ActualDelegate>(args);
             return;
         }
 
-        var del = ForkHelper<MyProcessDelegate>.Start("client.exe");
+        var del = PipeCaller<MyProcessDelegate>.Start("client.exe");
             
         try
         {
@@ -47,6 +47,7 @@ class Program
                 Console.WriteLine($"Add test failed: expected 8, got {result}");
                 allPassed = false;
             }
+            else Console.WriteLine("Test 1: PASSED");
         }
 
         // Test 2: String array
@@ -57,6 +58,7 @@ class Program
                 Console.WriteLine($"Concatenate test failed: expected 'Hello World !', got '{result}'");
                 allPassed = false;
             }
+            else Console.WriteLine("Test 2: PASSED");
         }
 
         // Test 3: Struct with string
@@ -67,6 +69,7 @@ class Program
                 Console.WriteLine($"ProcessObject test failed: expected Id=1, Name='Processed: Test', got Id={result.Id}, Name='{result.Name}'");
                 allPassed = false;
             }
+            else Console.WriteLine("Test 3: PASSED");
         }
 
         // Test 4: Null handling
@@ -77,6 +80,7 @@ class Program
                 Console.WriteLine("ProcessNullArray test failed for null input");
                 allPassed = false;
             }
+            else Console.WriteLine("Test 4a: PASSED");
 
             var emptyArrayResult = del.ProcessNullArray(new string[0]);
             if (emptyArrayResult.Length != 1 || emptyArrayResult[0] != "was empty")
@@ -84,6 +88,7 @@ class Program
                 Console.WriteLine("ProcessNullArray test failed for empty input");
                 allPassed = false;
             }
+            else Console.WriteLine("Test 4b: PASSED");
 
             var nullStringResult = del.ProcessNullString(null);
             if (nullStringResult != "was null")
@@ -91,6 +96,7 @@ class Program
                 Console.WriteLine("ProcessNullString test failed for null input");
                 allPassed = false;
             }
+            else Console.WriteLine("Test 4c: PASSED");
 
             var emptyStringResult = del.ProcessNullString("");
             if (emptyStringResult != "was empty")
@@ -98,6 +104,7 @@ class Program
                 Console.WriteLine("ProcessNullString test failed for empty input");
                 allPassed = false;
             }
+            else Console.WriteLine("Test 4d: PASSED");
         }
 
         // Test 5: Array of structs
@@ -115,6 +122,7 @@ class Program
                 Console.WriteLine("ProcessObjectArray test failed");
                 allPassed = false;
             }
+            else Console.WriteLine("Test 5: PASSED");
         }
 
         // Test 6: Complex struct
@@ -133,6 +141,7 @@ class Program
                 Console.WriteLine($"ProcessStruct test failed: got IntValue={result.IntValue}, StringValue='{result.StringValue}', FloatValue={result.FloatValue}");
                 allPassed = false;
             }
+            else Console.WriteLine("Test 6: PASSED");
         }
 
         // Test 7: Null in struct
@@ -151,6 +160,169 @@ class Program
                 Console.WriteLine("ProcessStruct test failed for null string");
                 allPassed = false;
             }
+            else Console.WriteLine("Test 7: PASSED");
+        }
+
+        // Test 8: All primitive types
+        {
+            Console.Write("Testing bool... ");
+            var boolResult = del.ProcessBoolean(true);
+            if (boolResult != false)
+            {
+                Console.WriteLine("FAILED");
+                allPassed = false;
+            }
+            else Console.WriteLine("PASSED");
+
+            Console.Write("Testing byte... ");
+            var byteResult = del.ProcessByte(123);
+            if (byteResult != 246)
+            {
+                Console.WriteLine("FAILED");
+                allPassed = false;
+            }
+            else Console.WriteLine("PASSED");
+
+            Console.Write("Testing sbyte... ");
+            var sbyteResult = del.ProcessSByte(-64);
+            if (sbyteResult != -128)
+            {
+                Console.WriteLine("FAILED");
+                allPassed = false;
+            }
+            else Console.WriteLine("PASSED");
+
+            Console.Write("Testing char... ");
+            var charResult = del.ProcessChar('A');
+            if (charResult != 'B')
+            {
+                Console.WriteLine("FAILED");
+                allPassed = false;
+            }
+            else Console.WriteLine("PASSED");
+
+            Console.Write("Testing short... ");
+            var shortResult = del.ProcessInt16(-12345);
+            if (shortResult != -24690)
+            {
+                Console.WriteLine("FAILED");
+                allPassed = false;
+            }
+            else Console.WriteLine("PASSED");
+
+            Console.Write("Testing ushort... ");
+            var ushortResult = del.ProcessUInt16(12345);
+            if (ushortResult != 24690)
+            {
+                Console.WriteLine("FAILED");
+                allPassed = false;
+            }
+            else Console.WriteLine("PASSED");
+
+            Console.Write("Testing int... ");
+            var intResult = del.ProcessInt32(-1234567);
+            if (intResult != -2469134)
+            {
+                Console.WriteLine("FAILED");
+                allPassed = false;
+            }
+            else Console.WriteLine("PASSED");
+
+            Console.Write("Testing uint... ");
+            var uintResult = del.ProcessUInt32(1234567);
+            if (uintResult != 2469134)
+            {
+                Console.WriteLine("FAILED");
+                allPassed = false;
+            }
+            else Console.WriteLine("PASSED");
+
+            Console.Write("Testing long... ");
+            var longResult = del.ProcessInt64(-1234567890L);
+            if (longResult != -2469135780L)
+            {
+                Console.WriteLine("FAILED");
+                allPassed = false;
+            }
+            else Console.WriteLine("PASSED");
+
+            Console.Write("Testing ulong... ");
+            var ulongResult = del.ProcessUInt64(1234567890UL);
+            if (ulongResult != 2469135780UL)
+            {
+                Console.WriteLine("FAILED");
+                allPassed = false;
+            }
+            else Console.WriteLine("PASSED");
+
+            Console.Write("Testing float... ");
+            var floatResult = del.ProcessSingle(3.14159f);
+            if (Math.Abs(floatResult - 6.28318f) > 0.00001f)
+            {
+                Console.WriteLine("FAILED");
+                allPassed = false;
+            }
+            else Console.WriteLine("PASSED");
+
+            Console.Write("Testing double... ");
+            var doubleResult = del.ProcessDouble(3.14159265359);
+            if (Math.Abs(doubleResult - 6.28318530718) > 0.00000000001)
+            {
+                Console.WriteLine("FAILED");
+                allPassed = false;
+            }
+            else Console.WriteLine("PASSED");
+
+            // Console.Write("Testing decimal... ");
+            // var decimalResult = del.ProcessDecimal(123.456m);
+            // if (decimalResult != 246.912m)
+            // {
+            //     Console.WriteLine("FAILED");
+            //     allPassed = false;
+            // }
+            // else Console.WriteLine("PASSED");
+        }
+
+        // Test 9: Struct with all primitives
+        {
+            Console.Write("Testing all primitives struct... ");
+            var input = new AllPrimitivesStruct
+            {
+                BoolValue = true,
+                ByteValue = 123,
+                SByteValue = -64,
+                CharValue = 'A',
+                ShortValue = -12345,
+                UShortValue = 12345,
+                IntValue = -1234567,
+                UIntValue = 1234567,
+                LongValue = -1234567890L,
+                ULongValue = 1234567890UL,
+                FloatValue = 3.14159f,
+                DoubleValue = 3.14159265359,
+                DecimalValue = 123.456m
+            };
+            
+            var result = del.ProcessAllPrimitives(input);
+            if (result.BoolValue != false ||
+                result.ByteValue != 246 ||
+                result.SByteValue != -128 ||
+                result.CharValue != 'B' ||
+                result.ShortValue != -24690 ||
+                result.UShortValue != 24690 ||
+                result.IntValue != -2469134 ||
+                result.UIntValue != 2469134 ||
+                result.LongValue != -2469135780L ||
+                result.ULongValue != 2469135780UL ||
+                Math.Abs(result.FloatValue - 6.28318f) > 0.00001f ||
+                Math.Abs(result.DoubleValue - 6.28318530718) > 0.00000000001// ||
+                // result.DecimalValue != 246.912m
+                )
+            {
+                Console.WriteLine("FAILED");
+                allPassed = false;
+            }
+            else Console.WriteLine("PASSED");
         }
 
         return allPassed;
@@ -272,5 +444,40 @@ public class ActualDelegate : MyProcessDelegate
         };
         // Console.WriteLine($"[Client-Impl] ProcessStruct result: IntValue={result.IntValue}, StringValue='{result.StringValue}', FloatValue={result.FloatValue}");
         return result;
+    }
+
+    public override bool ProcessBoolean(bool value) => !value;
+    public override byte ProcessByte(byte value) => (byte)(value * 2);
+    public override char ProcessChar(char value) => (char)(value + 1);
+    public override short ProcessInt16(short value) => (short)(value * 2);
+    public override long ProcessInt64(long value) => value * 2;
+    public override double ProcessDouble(double value) => value * 2;
+
+    public override sbyte ProcessSByte(sbyte value) => (sbyte)(value * 2);
+    public override ushort ProcessUInt16(ushort value) => (ushort)(value * 2);
+    public override int ProcessInt32(int value) => value * 2;
+    public override uint ProcessUInt32(uint value) => value * 2;
+    public override ulong ProcessUInt64(ulong value) => value * 2;
+    public override float ProcessSingle(float value) => value * 2;
+    public override decimal ProcessDecimal(decimal value) => value * 2;
+
+    public override AllPrimitivesStruct ProcessAllPrimitives(AllPrimitivesStruct data)
+    {
+        return new AllPrimitivesStruct
+        {
+            BoolValue = !data.BoolValue,
+            ByteValue = (byte)(data.ByteValue * 2),
+            SByteValue = (sbyte)(data.SByteValue * 2),
+            CharValue = (char)(data.CharValue + 1),
+            ShortValue = (short)(data.ShortValue * 2),
+            UShortValue = (ushort)(data.UShortValue * 2),
+            IntValue = data.IntValue * 2,
+            UIntValue = data.UIntValue * 2,
+            LongValue = data.LongValue * 2,
+            ULongValue = data.ULongValue * 2,
+            FloatValue = data.FloatValue * 2,
+            DoubleValue = data.DoubleValue * 2,
+            DecimalValue = data.DecimalValue * 2
+        };
     }
 }

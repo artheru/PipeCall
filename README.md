@@ -46,13 +46,20 @@ public class ActualDelegate : MyDelegate
     }
 }
 
+// Boilerplate code for client.exe
+class ProgramClient{
+    static void Main(string[] args){
+        PipeCallee.DelegateProcessMain<ActualDelegate>(args);
+    }
+}
+
 // Use it in your main program, like server.exe
 class Program
 {
     static void Main()
     {
         // Start the delegate in a new process
-        var del = ForkHelper<MyDelegate>.Start("client.exe");
+        var del = PipeCaller<MyDelegate>.Start("client.exe");
 
         // Call methods as if they were local
         int sum = del.Add(5, 3);
@@ -62,13 +69,14 @@ class Program
         Console.WriteLine($"Result: {concat}");  // Output: Result: Hello World
     }
 }
+
 ```
 
 ## How It Works
 
 1. You define an abstract class inheriting from `ProcessDelegate` with your desired methods
-2. Implement the actual delegate class with your business logic
-3. Use `ForkHelper<T>.Start()` to create a proxy in a new process
+2. Implement the actual delegate class with your business logic, and start client program with `PipeCallee.DelegateProcessMain<TActual>(args)`.
+3. Use `PipeCaller<T>.Start()` to create a proxy in a new process
 4. Call methods on the proxy as if they were local - PipeCall handles all the IPC
 
 ## Features in Detail

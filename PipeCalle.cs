@@ -10,7 +10,7 @@ public abstract class ProcessDelegate
 {
 }
 
-public static class ForkHelper<T> where T : ProcessDelegate
+public static class PipeCaller<T> where T : ProcessDelegate
 {
     public static T Start(string processPath)
     {
@@ -135,7 +135,7 @@ public static class ForkHelper<T> where T : ProcessDelegate
     }
 }
 
-public static class ForkHelper
+public static class PipeCallee
 {
     public static void DelegateProcessMain<T>(string[] pipe_arg) where T : ProcessDelegate
     {
